@@ -1,0 +1,5 @@
+[functions.forex-data]
+verify_jwt = false
+
+[functions.metaapi-sync]
+verify_jwt = false
