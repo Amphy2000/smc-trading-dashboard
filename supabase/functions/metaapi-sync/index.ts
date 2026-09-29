@@ -477,11 +477,13 @@ Deno.serve(async (req: Request) => {
           opened_at: openDate.toISOString(),
           closed_at: exit ? new Date(exit.time).toISOString() : null,
           session: getSessionFromTime(openDate),
-          confidence_level: 5,
-          mental_state: "neutral",
-          confluences: [],
+          confidence_level: null,
+          mental_state: null,
+          confluences: null,
+          setup_type: null,
           planned_rr: null,
           day_of_week: openDate.getDay(),
+          tagged: false,
         });
 
         if (!insertError) imported++;

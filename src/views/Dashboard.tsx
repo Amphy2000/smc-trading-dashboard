@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { PairData, TradingSignal, Trade, ViewName } from '@/lib/types';
+import { isTradeTagged } from '@/lib/types';
 import { Card, StatCard, Badge, Button } from '@/components/ui';
 import { EquityCurve } from '@/components/EquityCurve';
 import { DailyRecap } from '@/components/DailyRecap';
@@ -7,12 +8,14 @@ import {
   generateEdgeInsights, counterfactualAnalysis, bySession, bySetupType,
   scorePreTrade, getSessionFromTime, getDayOfWeek, SESSION_LABELS,
 } from '@/lib/edgeAnalyzer';
+import { detectBehavioralPatterns, validateEdge, getBehavioralWarnings } from '@/lib/behavioralPatterns';
+import { calculateAccountabilityStreak, getRuleViolations } from '@/lib/accountability';
 import { scanAllPairs, DEFAULT_STRATEGY } from '@/lib/signalEngine';
 import {
   Dna, Fingerprint, TrendingUp, TrendingDown, Activity, Target,
   ArrowRight, Zap, Clock, AlertTriangle, ClipboardCheck,
   BarChart3, BookOpen, Lightbulb, Flame, ShieldAlert, Sparkles,
-  Trophy, XCircle, Link2,
+  Trophy, XCircle, Link2, AlertOctagon, Microscope, Award, Tag, CheckCircle2,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -35,6 +38,12 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
   const cf = useMemo(() => counterfactualAnalysis(trades), [trades]);
   const sessionData = useMemo(() => bySession(trades), [trades]);
   const setupData = useMemo(() => bySetupType(trades), [trades]);
+  const patterns = useMemo(() => detectBehavioralPatterns(trades), [trades]);
+  const validation = useMemo(() => validateEdge(trades), [trades]);
+  const accountability = useMemo(() => calculateAccountabilityStreak(trades), [trades]);
+  const untaggedCount = useMemo(() => trades.filter((t) => t.status === 'closed' && !isTradeTagged(t)).length, [trades]);
+  const preTradeWarnings = useMemo(() => getBehavioralWarnings(trades), [trades]);
+  const stopWarnings = preTradeWarnings.filter((w) => w.level === 'stop');
 
   const quickScore = useMemo(() => {
     if (closedTrades.length < 5) return null;
@@ -392,6 +401,139 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
             Score Next <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
+      )}
+
+      {/* Pre-trade behavioral warnings */}
+      {stopWarnings.length > 0 && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 sm:px-5 py-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <AlertOctagon className="w-5 h-5 text-red-400" />
+            <h2 className="text-sm font-semibold text-red-400">Before You Trade Today</h2>
+          </div>
+          {stopWarnings.map((w, i) => (
+            <div key={i} className="bg-red-500/10 rounded-lg p-3 border border-red-500/20">
+              <p className="text-sm font-semibold text-slate-200">{w.message}</p>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">{w.detail}</p>
+            </div>
+          ))}
+          <Button size="sm" variant="danger" onClick={() => onNavigate('scorer')} className="flex-shrink-0">
+            Check Pre-Trade Score <ArrowRight className="w-4 h-4 ml-1" />
+          </Button>
+        </div>
+      )}
+
+      {/* Untagged trades prompt */}
+      {untaggedCount > 0 && (
+        <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3">
+          <Tag className="w-5 h-5 text-amber-400 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm text-slate-200">
+              {untaggedCount} synced trade{untaggedCount !== 1 ? 's' : ''} need tagging
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">Tag them with your mental state to unlock behavioral analysis</p>
+          </div>
+          <Button size="sm" variant="secondary" onClick={() => onNavigate('journal')} className="flex-shrink-0">
+            Tag Now <ArrowRight className="w-4 h-4 ml-1" />
+          </Button>
+        </div>
+      )}
+
+      {/* Accountability + Edge validation row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {accountability.totalTagged >= 2 && (
+          <Card className={`p-4 border ${
+            accountability.level === 'excellent' ? 'border-green-500/30 bg-green-500/5'
+            : accountability.level === 'good' ? 'border-blue-500/20 bg-blue-500/5'
+            : accountability.level === 'building' ? 'border-slate-700 bg-slate-800/30'
+            : 'border-red-500/20 bg-red-500/5'
+          }`}>
+            <div className="flex items-center gap-3">
+              {accountability.level === 'excellent' ? (
+                <Award className="w-5 h-5 text-green-400 flex-shrink-0" />
+              ) : accountability.level === 'good' ? (
+                <CheckCircle2 className="w-5 h-5 text-blue-400 flex-shrink-0" />
+              ) : accountability.level === 'broken' ? (
+                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              ) : (
+                <Flame className="w-5 h-5 text-slate-400 flex-shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-semibold text-slate-200">Rule Streak: {accountability.current}</span>
+                  <span className="text-xs text-slate-500">Best: {accountability.longest}</span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">{accountability.message}</p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        <Card className={`p-4 border ${
+          validation.isStatisticallySignificant
+            ? validation.winRate > 50 ? 'border-green-500/20 bg-green-500/5'
+            : 'border-red-500/20 bg-red-500/5'
+            : 'border-amber-500/20 bg-amber-500/5'
+        }`}>
+          <div className="flex items-center gap-3">
+            <Microscope className="w-5 h-5 text-blue-400 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-semibold text-slate-200">
+                  {validation.isStatisticallySignificant
+                    ? validation.winRate > 50 ? 'Edge Confirmed' : 'Negative Edge'
+                    : 'No Proven Edge'}
+                </span>
+                <span className="text-xs text-slate-500 font-mono">{validation.winRate.toFixed(0)}% WR / p={validation.pValue.toFixed(3)}</span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {validation.totalTrades < 30
+                  ? `${validation.totalTrades}/${validation.recommendedTradesForSignificance} trades for significance`
+                  : `95% CI: ${validation.confidenceInterval.lower.toFixed(0)}%–${validation.confidenceInterval.upper.toFixed(0)}%`}
+              </p>
+            </div>
+            <Button size="sm" variant="ghost" onClick={() => onNavigate('edge')} className="flex-shrink-0">
+              Details <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
+          </div>
+        </Card>
+      </div>
+
+      {/* Behavioral patterns alert */}
+      {patterns.length > 0 && patterns.some((p) => p.severity === 'critical' || p.severity === 'warning') && (
+        <Card className="p-5 border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <AlertOctagon className="w-5 h-5 text-red-400" />
+              <h2 className="text-sm font-semibold text-slate-200">Behavioral Patterns Detected</h2>
+              <Badge variant="danger">{patterns.length}</Badge>
+            </div>
+            <Button size="sm" variant="ghost" onClick={() => onNavigate('edge')}>
+              Full Analysis <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {patterns.filter((p) => p.severity === 'critical' || p.severity === 'warning').slice(0, 3).map((p) => (
+              <div key={p.id} className={`rounded-lg p-3 border ${
+                p.severity === 'critical'
+                  ? 'bg-red-500/5 border-red-500/30'
+                  : 'bg-amber-500/5 border-amber-500/20'
+              }`}>
+                <div className="flex items-start justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    {p.severity === 'critical'
+                      ? <Flame className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                      : <AlertTriangle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />}
+                    <span className="text-sm font-semibold text-slate-200">{p.title}</span>
+                  </div>
+                  <span className={`text-xs font-mono font-bold flex-shrink-0 ${p.estimatedCost < 0 ? 'text-red-400' : 'text-green-400'}`}>
+                    {p.estimatedCost > 0 ? '+' : ''}{p.estimatedCost.toFixed(0)}p
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">{p.description}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
       )}
 
       {/* Edge insights */}

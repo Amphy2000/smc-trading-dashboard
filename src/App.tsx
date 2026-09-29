@@ -290,6 +290,7 @@ function App() {
                   onClearPendingSignal={() => setPendingSignal(null)}
                   refetchTrades={refetch}
                   config={tradeConfig}
+                  pairs={pairs}
                 />
               )}
               {view === 'analytics' && <Analytics trades={trades} />}

@@ -26,6 +26,15 @@ export interface Trade {
   max_adverse_pips?: number | null;
   planned_rr?: number | null;
   day_of_week?: number | null;
+  tagged?: boolean | null;
+}
+
+export function isTradeTagged(t: Trade): boolean {
+  if (t.tagged === true) return true;
+  if (t.tagged === false) return false;
+  const autoSynced = t.notes?.includes('Auto-synced') ?? false;
+  if (!autoSynced) return true;
+  return !!(t.setup_type && t.mental_state && t.confidence_level != null);
 }
 
 export type TradingSession = 'asia' | 'london' | 'new_york' | 'overlap' | 'off_hours';
@@ -234,6 +243,35 @@ export interface EdgeInsight {
   detail: string;
   isPositive: boolean;
   sampleSize: number;
+}
+
+// Behavioral pattern detection
+
+export type PatternSeverity = 'critical' | 'warning' | 'info';
+
+export interface BehavioralPattern {
+  id: string;
+  title: string;
+  description: string;
+  severity: PatternSeverity;
+  evidence: string;
+  affectedTrades: number;
+  estimatedCost: number;
+}
+
+// Statistical edge validation
+
+export interface EdgeValidation {
+  winRate: number;
+  totalTrades: number;
+  wins: number;
+  losses: number;
+  isStatisticallySignificant: boolean;
+  confidenceInterval: { lower: number; upper: number };
+  pValue: number;
+  verdict: string;
+  sampleSizeAdequate: boolean;
+  recommendedTradesForSignificance: number;
 }
 
 export interface HeatmapCell {

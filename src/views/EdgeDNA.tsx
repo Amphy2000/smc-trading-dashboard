@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { Trade, HeatmapCell, EdgeInsight } from '@/lib/types';
+import type { Trade, HeatmapCell, EdgeInsight, BehavioralPattern, EdgeValidation } from '@/lib/types';
 import { Card, StatCard, Badge } from '@/components/ui';
 import { EquityCurve } from '@/components/EquityCurve';
 import {
@@ -8,9 +8,12 @@ import {
   counterfactualAnalysis, generateEdgeInsights,
   SESSION_LABELS, MENTAL_LABELS,
 } from '@/lib/edgeAnalyzer';
+import { detectBehavioralPatterns, validateEdge } from '@/lib/behavioralPatterns';
 import {
   Dna, Clock, Calendar, Brain, Smile, Zap, Layers, TrendingUp,
   TrendingDown, AlertTriangle, Target, Activity, Fingerprint,
+  AlertOctagon, ShieldAlert, TrendingDown as TrendDown, Microscope,
+  Gauge, Flame,
 } from 'lucide-react';
 
 interface EdgeDNAProps {
@@ -87,6 +90,8 @@ export function EdgeDNA({ trades }: EdgeDNAProps) {
   const closedTrades = trades.filter((t) => t.status === 'closed');
 
   const insights = useMemo(() => generateEdgeInsights(trades), [trades]);
+  const patterns = useMemo(() => detectBehavioralPatterns(trades), [trades]);
+  const validation = useMemo(() => validateEdge(trades), [trades]);
   const sessionData = useMemo(() => bySession(trades), [trades]);
   const dayData = useMemo(() => byDayOfWeek(trades), [trades]);
   const hourData = useMemo(() => byHourOfDay(trades), [trades]);
@@ -185,6 +190,115 @@ export function EdgeDNA({ trades }: EdgeDNAProps) {
                 <p className="text-sm font-semibold text-slate-200 mt-1">{ins.label}</p>
                 <p className="text-sm text-slate-400 mt-0.5">{ins.value}</p>
                 <p className="text-xs text-slate-500 mt-1.5">{ins.detail}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Statistical edge validation */}
+      <Card className="p-5 border-blue-500/20">
+        <div className="flex items-center gap-2 mb-4">
+          <Microscope className="w-5 h-5 text-blue-400" />
+          <h2 className="text-lg font-semibold text-slate-100">Statistical Edge Validation</h2>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="bg-slate-800/40 rounded-lg p-3 text-center">
+            <p className="text-xs text-slate-500">Win Rate</p>
+            <p className={`text-xl font-bold font-mono ${validation.winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+              {validation.winRate.toFixed(1)}%
+            </p>
+          </div>
+          <div className="bg-slate-800/40 rounded-lg p-3 text-center">
+            <p className="text-xs text-slate-500">W / L</p>
+            <p className="text-xl font-bold text-slate-200 font-mono">{validation.wins} / {validation.losses}</p>
+          </div>
+          <div className="bg-slate-800/40 rounded-lg p-3 text-center">
+            <p className="text-xs text-slate-500">95% CI</p>
+            <p className="text-sm font-bold text-slate-300 font-mono">{validation.confidenceInterval.lower.toFixed(0)}%–{validation.confidenceInterval.upper.toFixed(0)}%</p>
+          </div>
+          <div className="bg-slate-800/40 rounded-lg p-3 text-center">
+            <p className="text-xs text-slate-500">p-value</p>
+            <p className={`text-xl font-bold font-mono ${validation.pValue < 0.05 ? 'text-green-400' : 'text-slate-400'}`}>
+              {validation.pValue.toFixed(3)}
+            </p>
+          </div>
+        </div>
+
+        <div className={`rounded-lg p-4 border ${
+          validation.isStatisticallySignificant
+            ? validation.winRate > 50
+              ? 'bg-green-500/5 border-green-500/20'
+              : 'bg-red-500/5 border-red-500/20'
+            : 'bg-amber-500/5 border-amber-500/20'
+        }`}>
+          <div className="flex items-center gap-2 mb-2">
+            {validation.isStatisticallySignificant ? (
+              validation.winRate > 50
+                ? <ShieldAlert className="w-5 h-5 text-green-400" />
+                : <ShieldAlert className="w-5 h-5 text-red-400" />
+            ) : (
+              <AlertTriangle className="w-5 h-5 text-amber-400" />
+            )}
+            <span className="text-sm font-semibold text-slate-200">
+              {validation.isStatisticallySignificant
+                ? validation.winRate > 50 ? 'Edge Confirmed' : 'Negative Edge Confirmed'
+                : 'No Proven Edge Yet'}
+            </span>
+          </div>
+          <p className="text-sm text-slate-400 leading-relaxed">{validation.verdict}</p>
+          {!validation.sampleSizeAdequate && (
+            <p className="text-xs text-slate-500 mt-2">
+              You have {validation.totalTrades} trades. For a reliable test you need about {validation.recommendedTradesForSignificance} trades. Keep logging.
+            </p>
+          )}
+        </div>
+      </Card>
+
+      {/* Behavioral pattern detection */}
+      {patterns.length > 0 && (
+        <Card className="p-5 border-red-500/20">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertOctagon className="w-5 h-5 text-red-400" />
+            <h2 className="text-lg font-semibold text-slate-100">Behavioral Patterns Detected</h2>
+            <Badge variant="danger">{patterns.length} found</Badge>
+          </div>
+          <p className="text-xs text-slate-500 mb-4">
+            These are recurring behavioral patterns in your trading data — not one-off events. Each pattern has been detected across multiple trades and is costing you real pips.
+          </p>
+          <div className="space-y-3">
+            {patterns.map((p) => (
+              <div
+                key={p.id}
+                className={`rounded-lg p-4 border ${
+                  p.severity === 'critical'
+                    ? 'bg-red-500/5 border-red-500/30'
+                    : p.severity === 'warning'
+                    ? 'bg-amber-500/5 border-amber-500/20'
+                    : 'bg-blue-500/5 border-blue-500/20'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {p.severity === 'critical' ? (
+                      <Flame className="w-4 h-4 text-red-400 flex-shrink-0" />
+                    ) : p.severity === 'warning' ? (
+                      <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                    ) : (
+                      <Gauge className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                    )}
+                    <span className="text-sm font-semibold text-slate-200">{p.title}</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs text-slate-500">{p.affectedTrades} trades</span>
+                    <span className={`text-xs font-mono font-bold ${p.estimatedCost < 0 ? 'text-red-400' : 'text-green-400'}`}>
+                      {p.estimatedCost > 0 ? '+' : ''}{p.estimatedCost.toFixed(0)}p
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-400 leading-relaxed">{p.description}</p>
+                <p className="text-xs text-slate-600 mt-2 italic">Evidence: {p.evidence}</p>
               </div>
             ))}
           </div>

@@ -5,10 +5,11 @@ import {
   scorePreTrade, getSessionFromTime, getDayOfWeek,
   SESSION_LABELS, MENTAL_LABELS,
 } from '@/lib/edgeAnalyzer';
+import { getBehavioralWarnings } from '@/lib/behavioralPatterns';
 import {
   ClipboardCheck, TrendingUp, TrendingDown,
   AlertTriangle, CheckCircle2, XCircle, Brain, Zap, Lightbulb,
-  ChevronDown, ChevronUp, Sparkles,
+  ChevronDown, ChevronUp, Sparkles, ShieldAlert, AlertOctagon,
 } from 'lucide-react';
 
 interface ScorerProps {
@@ -99,6 +100,14 @@ export function PreTradeScorer({ trades, config }: ScorerProps) {
     confluences: form.confluences,
     dayOfWeek,
   }), [trades, form, session, dayOfWeek]);
+
+  const behavioralWarnings = useMemo(
+    () => getBehavioralWarnings(trades, form.mental_state),
+    [trades, form.mental_state]
+  );
+
+  const hasStopWarning = behavioralWarnings.some((w) => w.level === 'stop');
+  const hasFrictionWarning = behavioralWarnings.some((w) => w.level === 'friction');
 
   const closedCount = trades.filter((t) => t.status === 'closed').length;
   const hasHistory = closedCount >= 5;
@@ -251,6 +260,47 @@ export function PreTradeScorer({ trades, config }: ScorerProps) {
               </div>
             </div>
           </Card>
+
+          {/* Behavioral intervention gate */}
+          {behavioralWarnings.length > 0 && (
+            <Card className={`p-5 border ${
+              hasStopWarning
+                ? 'border-red-500/30 bg-red-500/5'
+                : hasFrictionWarning
+                ? 'border-amber-500/20 bg-amber-500/5'
+                : 'border-blue-500/20 bg-blue-500/5'
+            }`}>
+              <div className="flex items-center gap-2 mb-3">
+                {hasStopWarning ? (
+                  <AlertOctagon className="w-5 h-5 text-red-400" />
+                ) : hasFrictionWarning ? (
+                  <ShieldAlert className="w-5 h-5 text-amber-400" />
+                ) : (
+                  <Brain className="w-5 h-5 text-blue-400" />
+                )}
+                <h2 className="text-sm font-semibold text-slate-200">
+                  {hasStopWarning ? 'Stop — Read This First' : hasFrictionWarning ? 'Slow Down' : 'Heads Up'}
+                </h2>
+              </div>
+              <div className="space-y-3">
+                {behavioralWarnings.map((w, i) => (
+                  <div
+                    key={i}
+                    className={`rounded-lg p-3 border ${
+                      w.level === 'stop'
+                        ? 'bg-red-500/10 border-red-500/30'
+                        : w.level === 'friction'
+                        ? 'bg-amber-500/10 border-amber-500/20'
+                        : 'bg-blue-500/10 border-blue-500/20'
+                    }`}
+                  >
+                    <p className="text-sm font-semibold text-slate-200">{w.message}</p>
+                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{w.detail}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
           {/* Insights */}
           <Card className="p-5">
