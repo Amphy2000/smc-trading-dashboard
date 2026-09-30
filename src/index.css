@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === Global mobile fixes === */
+/* === Foundation === */
 html {
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
@@ -15,6 +15,9 @@ body {
   overflow-x: hidden;
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Prevent iOS auto-zoom on input focus — inputs must be >= 16px */
@@ -45,3 +48,50 @@ input, select, textarea {
 
 /* Prevent horizontal overflow in grid/table containers */
 table { max-width: 100%; }
+
+/* === Premium scrollbar (desktop) === */
+@media (min-width: 1024px) {
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+}
+
+/* === Reusable component classes === */
+@layer components {
+  .glass {
+    @apply bg-ink-900/70 border border-white/[0.06] backdrop-blur-xl;
+  }
+  .glass-card {
+    @apply bg-ink-900/60 border border-white/[0.06] backdrop-blur-xl rounded-2xl;
+  }
+  .glass-hover {
+    @apply transition-all duration-300 hover:border-white/[0.12] hover:shadow-card-hover;
+  }
+  .text-gradient {
+    @apply bg-gradient-to-r from-white via-white to-slate-400 bg-clip-text text-transparent;
+  }
+  .shimmer-bg {
+    background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+}
+
+/* === Stagger animation helper === */
+.stagger > * {
+  animation: fadeInUp 0.4s ease-out backwards;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger > *:nth-child(3) { animation-delay: 0.10s; }
+.stagger > *:nth-child(4) { animation-delay: 0.14s; }
+.stagger > *:nth-child(5) { animation-delay: 0.18s; }
+.stagger > *:nth-child(6) { animation-delay: 0.22s; }
+.stagger > *:nth-child(7) { animation-delay: 0.26s; }
+.stagger > *:nth-child(8) { animation-delay: 0.30s; }
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}

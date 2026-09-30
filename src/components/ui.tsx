@@ -11,7 +11,7 @@ export function Card({ children, className = '', onClick }: CardProps) {
   return (
     <div
       onClick={onClick}
-      className={`bg-slate-900/80 border border-slate-800 rounded-xl backdrop-blur-sm ${onClick ? 'cursor-pointer hover:border-slate-700 transition-colors' : ''} ${className}`}
+      className={`bg-ink-900/60 border border-white/[0.06] rounded-2xl backdrop-blur-xl shadow-card transition-all duration-300 ${onClick ? 'cursor-pointer hover:border-white/[0.12] hover:shadow-card-hover hover:-translate-y-0.5' : ''} ${className}`}
     >
       {children}
     </div>
@@ -27,17 +27,18 @@ interface StatCardProps {
 }
 
 export function StatCard({ label, value, subtext, icon, trend }: StatCardProps) {
-  const trendColor = trend === 'up' ? 'text-green-400' : trend === 'down' ? 'text-red-400' : 'text-slate-400';
+  const trendColor = trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-rose-400' : 'text-slate-300';
+  const trendGlow = trend === 'up' ? 'from-emerald-500/10' : trend === 'down' ? 'from-rose-500/10' : 'from-white/[0.03]';
 
   return (
-    <Card className="p-4">
+    <Card className={`p-4 sm:p-5 bg-gradient-to-br ${trendGlow} via-ink-900/60 to-transparent`}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">{label}</p>
-          <p className={`text-2xl font-bold mt-1 font-mono ${trendColor}`}>{value}</p>
-          {subtext && <p className="text-xs text-slate-500 mt-1">{subtext}</p>}
+          <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-medium">{label}</p>
+          <p className={`text-xl sm:text-2xl font-bold mt-1.5 font-mono tracking-tight ${trendColor}`}>{value}</p>
+          {subtext && <p className="text-[11px] text-slate-500 mt-1">{subtext}</p>}
         </div>
-        {icon && <div className="text-slate-500">{icon}</div>}
+        {icon && <div className="text-slate-600 mt-0.5">{icon}</div>}
       </div>
     </Card>
   );
@@ -50,11 +51,11 @@ interface BadgeProps {
 
 export function Badge({ children, variant = 'neutral' }: BadgeProps) {
   const variants = {
-    success: 'bg-green-500/10 text-green-400 border-green-500/20',
-    danger: 'bg-red-500/10 text-red-400 border-red-500/20',
+    success: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    danger: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
     warning: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    info: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    neutral: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+    info: 'bg-accent-500/10 text-accent-400 border-accent-500/20',
+    neutral: 'bg-white/[0.04] text-slate-400 border-white/[0.08]',
   };
 
   return (
@@ -76,16 +77,16 @@ interface ButtonProps {
 
 export function Button({ children, onClick, variant = 'primary', size = 'md', disabled, className = '', type = 'button' }: ButtonProps) {
   const variants = {
-    primary: 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20',
-    secondary: 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700',
-    danger: 'bg-red-600 hover:bg-red-500 text-white',
-    ghost: 'hover:bg-slate-800 text-slate-300',
+    primary: 'bg-accent-600 hover:bg-accent-500 text-white shadow-glow-sm hover:shadow-glow hover:bg-accent-500',
+    secondary: 'bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 border border-white/[0.08] hover:border-white/[0.14]',
+    danger: 'bg-rose-500/90 hover:bg-rose-500 text-white shadow-sm shadow-rose-500/20',
+    ghost: 'hover:bg-white/[0.04] text-slate-400 hover:text-slate-200',
   };
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
+    sm: 'px-3 py-1.5 text-xs',
+    md: 'px-4 py-2.5 text-sm',
+    lg: 'px-6 py-3 text-sm',
   };
 
   return (
@@ -93,7 +94,7 @@ export function Button({ children, onClick, variant = 'primary', size = 'md', di
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-lg font-medium transition-all ${variants[variant]} ${sizes[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      className={`rounded-xl font-medium transition-all duration-200 active:scale-[0.97] ${variants[variant]} ${sizes[size]} ${disabled ? 'opacity-40 cursor-not-allowed active:scale-100' : ''} ${className}`}
     >
       {children}
     </button>
@@ -115,7 +116,7 @@ interface InputProps {
 export function Input({ label, value, onChange, type = 'text', placeholder, step, min, max, className = '' }: InputProps) {
   return (
     <div className={className}>
-      {label && <label className="block text-xs text-slate-400 mb-1.5 font-medium">{label}</label>}
+      {label && <label className="block text-xs text-slate-400 mb-1.5 font-medium tracking-wide">{label}</label>}
       <input
         type={type}
         value={value}
@@ -124,7 +125,7 @@ export function Input({ label, value, onChange, type = 'text', placeholder, step
         step={step}
         min={min}
         max={max}
-        className="w-full bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm font-mono focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        className="w-full bg-ink-850/80 border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-slate-100 text-sm font-mono placeholder-slate-600 focus:outline-none focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/15 transition-all duration-200"
       />
     </div>
   );
@@ -141,11 +142,11 @@ interface SelectProps {
 export function Select({ label, value, onChange, options, className = '' }: SelectProps) {
   return (
     <div className={className}>
-      {label && <label className="block text-xs text-slate-400 mb-1.5 font-medium">{label}</label>}
+      {label && <label className="block text-xs text-slate-400 mb-1.5 font-medium tracking-wide">{label}</label>}
       <select
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
-        className="w-full bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        className="w-full bg-ink-850/80 border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/15 transition-all duration-200"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -165,11 +166,11 @@ interface PairSelectProps {
 export function PairSelect({ label, value, onChange, className = '' }: PairSelectProps) {
   return (
     <div className={className}>
-      {label && <label className="block text-xs text-slate-400 mb-1.5 font-medium">{label}</label>}
+      {label && <label className="block text-xs text-slate-400 mb-1.5 font-medium tracking-wide">{label}</label>}
       <select
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
-        className="w-full bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        className="w-full bg-ink-850/80 border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/15 transition-all duration-200"
       >
         {PAIR_CATEGORIES.map((cat) => {
           const pairs = FOREX_PAIRS.filter((p) => p.category === cat.key);
@@ -199,11 +200,14 @@ export function Modal({ open, onClose, title, children, width = 'max-w-lg' }: Mo
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className={`w-full ${width} bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto`} onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
-          <h2 className="text-lg font-semibold text-slate-100">{title}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 transition-colors text-xl leading-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in" onClick={onClose}>
+      <div
+        className={`w-full ${width} bg-ink-900 border border-white/[0.08] rounded-2xl shadow-modal max-h-[90vh] overflow-y-auto animate-scale-in`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-white/[0.06]">
+          <h2 className="text-base font-semibold text-slate-100 tracking-tight">{title}</h2>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.04] transition-all text-xl leading-none">
             &times;
           </button>
         </div>

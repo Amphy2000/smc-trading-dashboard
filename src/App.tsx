@@ -82,10 +82,13 @@ function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-ink-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 text-sm">Loading...</p>
+          <div className="relative w-14 h-14 mx-auto mb-5">
+            <div className="absolute inset-0 border-2 border-accent-500/20 rounded-full" />
+            <div className="absolute inset-0 border-2 border-transparent border-t-accent-500 rounded-full animate-spin" />
+          </div>
+          <p className="text-slate-500 text-sm font-medium tracking-wide">Loading TraderDNA</p>
         </div>
       </div>
     );
@@ -110,49 +113,58 @@ function App() {
   const secondaryItems = NAV_ITEMS.filter((i) => !i.primary);
   const currentNav = NAV_ITEMS.find((i) => i.view === view);
 
-  const desktopNavItems = NAV_ITEMS.map((item) => (
-    <button
-      key={item.view}
-      onClick={() => navigate(item.view)}
-      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all w-full ${
-        view === item.view
-          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-      }`}
-    >
-      <item.icon className="w-5 h-5 flex-shrink-0" />
-      <span>{item.label}</span>
-    </button>
-  ));
+  const desktopNavItems = NAV_ITEMS.map((item) => {
+    const isActive = view === item.view;
+    return (
+      <button
+        key={item.view}
+        onClick={() => navigate(item.view)}
+        className={`group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 w-full relative ${
+          isActive
+            ? 'bg-accent-500/10 text-accent-400'
+            : 'text-slate-500 hover:text-slate-200 hover:bg-white/[0.03]'
+        }`}
+      >
+        {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-accent-500 rounded-full" />}
+        <item.icon className={`w-[18px] h-[18px] flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} />
+        <span>{item.label}</span>
+      </button>
+    );
+  });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-slate-900/95 border-r border-slate-800 flex-col p-4 z-40">
-        <div className="flex items-center gap-2 px-2 py-3 mb-4">
-          <div className="p-2 bg-blue-600/20 rounded-lg">
-            <Dna className="w-6 h-6 text-blue-400" />
+    <div className="min-h-screen bg-ink-950 text-slate-100 overflow-x-hidden font-sans">
+      {/* Ambient background glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-accent-600/[0.07] rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 -right-40 w-[400px] h-[400px] bg-accent-700/[0.05] rounded-full blur-[120px]" />
+      </div>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-ink-900/80 border-r border-white/[0.05] flex-col p-4 z-40 backdrop-blur-xl">
+        <div className="flex items-center gap-2.5 px-2 py-3 mb-5">
+          <div className="relative p-2 bg-accent-600/15 rounded-xl ring-1 ring-accent-500/20">
+            <Dna className="w-6 h-6 text-accent-400" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-slate-100">TraderDNA</h1>
-            <p className="text-xs text-slate-500">Your Trading Edge</p>
+            <h1 className="text-base font-bold text-slate-100 tracking-tight">TraderDNA</h1>
+            <p className="text-[11px] text-slate-500 font-medium">Your Trading Edge</p>
           </div>
         </div>
-        <nav className="flex flex-col gap-1 flex-1">
+        <nav className="flex flex-col gap-0.5 flex-1 overflow-y-auto no-scrollbar">
           {desktopNavItems}
         </nav>
-        <div className="border-t border-slate-800 pt-4 px-2 space-y-2">
-          <p className="text-xs text-slate-500">{tradeConfig.setupTypes.length} setup types</p>
-          <p className="text-xs text-slate-500">{tradeConfig.confluences.length} confluences</p>
-          <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
-            <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-semibold text-blue-400">
+        <div className="border-t border-white/[0.05] pt-4 px-2 space-y-2">
+          <div className="flex items-center gap-2.5 py-1">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent-500/20 to-accent-700/10 flex items-center justify-center flex-shrink-0 ring-1 ring-accent-500/20">
+              <span className="text-xs font-semibold text-accent-400">
                 {session.user.email?.charAt(0).toUpperCase()}
               </span>
             </div>
             <span className="text-xs text-slate-400 truncate flex-1">{session.user.email}</span>
             <button
               onClick={() => signOut()}
-              className="text-slate-500 hover:text-red-400 transition-colors p-1"
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
               title="Sign out"
             >
               <LogOut className="w-4 h-4" />
@@ -161,23 +173,25 @@ function App() {
         </div>
       </aside>
 
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-slate-900/95 border-b border-slate-800 z-40 px-4 py-3 flex items-center justify-between backdrop-blur-sm safe-top">
+      {/* Mobile header */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-ink-900/80 border-b border-white/[0.05] z-40 px-4 py-3 flex items-center justify-between backdrop-blur-xl safe-top">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-blue-600/20 rounded-lg">
-            <Dna className="w-5 h-5 text-blue-400" />
+          <div className="p-1.5 bg-accent-600/15 rounded-lg ring-1 ring-accent-500/20">
+            <Dna className="w-5 h-5 text-accent-400" />
           </div>
-          <h1 className="text-base font-bold">TraderDNA</h1>
+          <h1 className="text-base font-bold tracking-tight">TraderDNA</h1>
         </div>
-        <span className="text-xs text-slate-500">{currentNav?.label}</span>
+        <span className="text-xs text-slate-500 font-medium">{currentNav?.label}</span>
       </header>
 
+      {/* Mobile more menu */}
       {moreMenuOpen && (
         <>
-          <div className="lg:hidden fixed inset-0 top-0 z-45 bg-black/40" onClick={() => setMoreMenuOpen(false)} />
-          <div className="lg:hidden fixed bottom-[72px] left-2 right-2 z-50 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-3 safe-bottom">
+          <div className="lg:hidden fixed inset-0 top-0 z-45 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setMoreMenuOpen(false)} />
+          <div className="lg:hidden fixed bottom-[76px] left-2 right-2 z-50 bg-ink-900/95 border border-white/[0.08] rounded-2xl shadow-modal p-3 safe-bottom animate-slide-up backdrop-blur-xl">
             <div className="flex items-center justify-between mb-3 px-2">
               <span className="text-sm font-semibold text-slate-300">More Tools</span>
-              <button onClick={() => setMoreMenuOpen(false)} className="text-slate-400 hover:text-slate-200 p-1">
+              <button onClick={() => setMoreMenuOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] transition-all">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -186,10 +200,10 @@ function App() {
                 <button
                   key={item.view}
                   onClick={() => navigate(item.view)}
-                  className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
                     view === item.view
-                      ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                      : 'text-slate-400 bg-slate-800/50 hover:text-slate-200'
+                      ? 'bg-accent-500/10 text-accent-400 ring-1 ring-accent-500/20'
+                      : 'text-slate-400 bg-white/[0.03] hover:text-slate-200 hover:bg-white/[0.06]'
                   }`}
                 >
                   <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -197,10 +211,10 @@ function App() {
                 </button>
               ))}
             </div>
-            <div className="mt-3 pt-3 border-t border-slate-800">
+            <div className="mt-3 pt-3 border-t border-white/[0.05]">
               <div className="flex items-center gap-2 px-2 mb-2">
-                <div className="w-7 h-7 rounded-full bg-blue-600/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-blue-400">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent-500/20 to-accent-700/10 flex items-center justify-center flex-shrink-0 ring-1 ring-accent-500/20">
+                  <span className="text-xs font-semibold text-accent-400">
                     {session.user.email?.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -208,7 +222,7 @@ function App() {
               </div>
               <button
                 onClick={() => signOut()}
-                className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors"
+                className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-rose-400 bg-rose-500/10 hover:bg-rose-500/15 transition-all"
               >
                 <LogOut className="w-4 h-4 flex-shrink-0" />
                 <span>Sign Out</span>
@@ -218,7 +232,8 @@ function App() {
         </>
       )}
 
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 border-t border-slate-800 z-40 backdrop-blur-md safe-bottom">
+      {/* Mobile bottom nav */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-ink-900/85 border-t border-white/[0.05] z-40 backdrop-blur-xl safe-bottom">
         <div className="flex items-stretch justify-around px-1 py-1">
           {primaryItems.map((item) => {
             const isActive = view === item.view;
@@ -226,21 +241,19 @@ function App() {
               <button
                 key={item.view}
                 onClick={() => navigate(item.view)}
-                className={`flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 rounded-lg transition-colors flex-1 min-w-0 ${
-                  isActive ? 'text-blue-400' : 'text-slate-500 hover:text-slate-300'
-                }`}
+                className={`flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 rounded-xl transition-all duration-200 flex-1 min-w-0 ${isActive ? 'text-accent-400' : 'text-slate-600 hover:text-slate-300'}`}
               >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
+                <item.icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`} />
                 <span className="text-[10px] font-medium truncate">{item.shortLabel}</span>
               </button>
             );
           })}
           <button
             onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-            className={`flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 rounded-lg transition-colors flex-1 min-w-0 ${
+            className={`flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 rounded-xl transition-colors flex-1 min-w-0 ${
               moreMenuOpen || secondaryItems.some((i) => i.view === view)
-                ? 'text-blue-400'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'text-accent-400'
+                : 'text-slate-600 hover:text-slate-300'
             }`}
           >
             <MoreHorizontal className="w-5 h-5 flex-shrink-0" />
@@ -249,17 +262,21 @@ function App() {
         </div>
       </nav>
 
-      <main className="lg:ml-60 pt-14 lg:pt-0 pb-20 lg:pb-0 min-h-screen overflow-x-hidden">
+      {/* Main content */}
+      <main className="lg:ml-64 pt-14 lg:pt-0 pb-20 lg:pb-0 min-h-screen overflow-x-hidden relative">
         <div className="p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
           {loading ? (
             <div className="flex items-center justify-center min-h-[60vh]">
               <div className="text-center">
-                <div className="w-12 h-12 border-4 border-blue-600/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-slate-400">Loading market data...</p>
+                <div className="relative w-14 h-14 mx-auto mb-5">
+                  <div className="absolute inset-0 border-2 border-accent-500/20 rounded-full" />
+                  <div className="absolute inset-0 border-2 border-transparent border-t-accent-500 rounded-full animate-spin" />
+                </div>
+                <p className="text-slate-500 text-sm font-medium">Loading market data...</p>
               </div>
             </div>
           ) : (
-            <>
+            <div key={view} className="animate-fade-in-up">
               {view === 'dashboard' && (
                 <Dashboard
                   pairs={pairs}
@@ -313,7 +330,7 @@ function App() {
                   onStrategyChange={setStrategy}
                 />
               )}
-            </>
+            </div>
           )}
         </div>
       </main>

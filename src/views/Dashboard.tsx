@@ -84,7 +84,6 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
     }
   }
 
-  // Onboarding state: 0 trades = full guide, 1-4 = progress, 5+ = full dashboard
   const isNewUser = trades.length === 0;
   const isBeginner = trades.length > 0 && closedTrades.length < 5;
 
@@ -97,21 +96,21 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
     ];
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 stagger">
         {!isLive && (
-          <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2.5">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2.5">
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
             <span className="text-sm text-amber-400">Live market data unavailable — using simulated prices. Your edge analysis works on your trade history regardless.</span>
           </div>
         )}
 
         {/* Hero welcome */}
-        <Card className="p-8 border-blue-500/20 bg-gradient-to-br from-blue-500/10 via-slate-900/80 to-transparent">
+        <Card className="p-8 border-accent-500/15 bg-gradient-to-br from-accent-500/[0.08] via-ink-900/60 to-transparent">
           <div className="flex flex-col items-center text-center">
-            <div className="p-4 bg-blue-600/20 rounded-2xl mb-4">
-              <Dna className="w-12 h-12 text-blue-400" />
+            <div className="relative p-4 bg-accent-600/15 rounded-2xl mb-4 ring-1 ring-accent-500/20 shadow-glow">
+              <Dna className="w-12 h-12 text-accent-400" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 mb-2">Welcome to TraderDNA</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 mb-2 tracking-tight">Welcome to TraderDNA</h1>
             <p className="text-slate-400 max-w-lg text-sm leading-relaxed">
               This isn't just another journal. It's your personal trading edge discovery engine.
               Connect your broker and trades sync automatically — or log them manually in seconds.
@@ -123,14 +122,12 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
         {/* 3-step guide */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {steps.map((step, i) => (
-            <Card key={i} className="p-5 flex flex-col">
+            <Card key={i} className="p-5 flex flex-col glass-hover">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center flex-shrink-0">
-                  <step.icon className="w-5 h-5 text-blue-400" />
+                <div className="w-10 h-10 rounded-xl bg-accent-600/10 flex items-center justify-center flex-shrink-0 ring-1 ring-accent-500/15">
+                  <step.icon className="w-5 h-5 text-accent-400" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-600">STEP {i + 1}</span>
-                </div>
+                <span className="text-xs font-bold text-slate-600 tracking-widest">STEP {i + 1}</span>
               </div>
               <h3 className="text-sm font-semibold text-slate-200 mb-1">{step.title}</h3>
               <p className="text-xs text-slate-500 leading-relaxed flex-1">{step.desc}</p>
@@ -143,9 +140,11 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
 
         {/* Quick wins */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="p-5 border-blue-500/20">
+          <Card className="p-5 border-accent-500/15 glass-hover">
             <div className="flex items-center gap-3 mb-3">
-              <ClipboardCheck className="w-5 h-5 text-blue-400" />
+              <div className="p-2 bg-accent-600/10 rounded-lg ring-1 ring-accent-500/15">
+                <ClipboardCheck className="w-5 h-5 text-accent-400" />
+              </div>
               <h3 className="text-sm font-semibold text-slate-200">Pre-Trade Scorer</h3>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed mb-4">
@@ -157,9 +156,11 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
             </Button>
           </Card>
 
-          <Card className="p-5 border-blue-500/20">
+          <Card className="p-5 border-accent-500/15 glass-hover">
             <div className="flex items-center gap-3 mb-3">
-              <Sparkles className="w-5 h-5 text-blue-400" />
+              <div className="p-2 bg-accent-600/10 rounded-lg ring-1 ring-accent-500/15">
+                <Sparkles className="w-5 h-5 text-accent-400" />
+              </div>
               <h3 className="text-sm font-semibold text-slate-200">Market Scanner</h3>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed mb-4">
@@ -186,7 +187,7 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {strongSignals.map((sig) => (
-                <Card key={sig.pair} className="p-4 cursor-pointer hover:border-slate-700" onClick={() => onNavigate('scanner')}>
+                <Card key={sig.pair} className="p-4 cursor-pointer glass-hover" onClick={() => onNavigate('scanner')}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-bold text-slate-200">{sig.pair}</span>
                     <Badge variant={sig.direction === 'BUY' ? 'success' : 'danger'}>
@@ -212,34 +213,34 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
     const tradesNeeded = 5 - progressToEdge;
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 stagger">
         <DailyRecap trades={trades} />
         {!isLive && (
-          <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2.5">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2.5">
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
             <span className="text-sm text-amber-400">Live market data unavailable — using simulated prices. Your edge analysis works on your trade history regardless.</span>
           </div>
         )}
 
         {/* Progress card */}
-        <Card className="p-6 border-blue-500/20 bg-gradient-to-br from-blue-500/10 via-slate-900/80 to-transparent">
+        <Card className="p-6 border-accent-500/15 bg-gradient-to-br from-accent-500/[0.08] via-ink-900/60 to-transparent">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-blue-600/20 rounded-xl">
-                <Trophy className="w-6 h-6 text-blue-400" />
+              <div className="p-2.5 bg-accent-600/15 rounded-xl ring-1 ring-accent-500/20">
+                <Trophy className="w-6 h-6 text-accent-400" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-slate-100">You're building your edge</h2>
+                <h2 className="text-lg font-semibold text-slate-100 tracking-tight">You're building your edge</h2>
                 <p className="text-xs text-slate-500 mt-0.5">{progressToEdge} of 5 trades logged</p>
               </div>
             </div>
-            <span className="text-3xl font-bold text-blue-400 font-mono">{progressToEdge}/5</span>
+            <span className="text-3xl font-bold text-accent-400 font-mono">{progressToEdge}/5</span>
           </div>
 
           {/* Progress bar */}
-          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-4">
+          <div className="w-full h-2 bg-ink-850 rounded-full overflow-hidden mb-4">
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-accent-600 to-accent-400 rounded-full transition-all duration-500 shadow-glow-sm"
               style={{ width: `${(progressToEdge / 5) * 100}%` }}
             />
           </div>
@@ -296,7 +297,7 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
           <Card className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-blue-400" />
+                <BarChart3 className="w-4 h-4 text-accent-400" />
                 <h2 className="text-sm font-semibold text-slate-300">Recent Trades</h2>
               </div>
               <Button size="sm" variant="ghost" onClick={() => onNavigate('journal')}>
@@ -305,13 +306,13 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
             </div>
             <div className="space-y-1.5">
               {recentTrades.map((t) => (
-                <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-800/30 gap-2">
+                <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors gap-2">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <Badge variant={t.direction === 'BUY' ? 'success' : 'danger'}>{t.direction}</Badge>
                     <span className="text-sm text-slate-200 font-medium truncate">{t.pair}</span>
                     {t.setup_type && <span className="text-xs text-slate-500 hidden sm:inline">{t.setup_type}</span>}
                   </div>
-                  <span className={`text-sm font-mono font-bold flex-shrink-0 ${(t.pips_result || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <span className={`text-sm font-mono font-bold flex-shrink-0 ${(t.pips_result || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {(t.pips_result || 0) > 0 ? '+' : ''}{(t.pips_result || 0).toFixed(1)}p
                   </span>
                 </div>
@@ -322,14 +323,14 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
 
         {/* Open trades with quick close */}
         {openTrades.length > 0 && (
-          <Card className="p-5 border-blue-500/20">
+          <Card className="p-5 border-accent-500/15">
             <div className="flex items-center gap-2 mb-3">
-              <Activity className="w-5 h-5 text-blue-400" />
+              <Activity className="w-5 h-5 text-accent-400" />
               <h2 className="text-sm font-semibold text-slate-300">Open Positions</h2>
             </div>
             <div className="space-y-2">
               {openTrades.map((t) => (
-                <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-800/30 gap-2">
+                <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors gap-2">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <Badge variant={t.direction === 'BUY' ? 'success' : 'danger'}>{t.direction}</Badge>
                     <span className="text-sm text-slate-200 font-medium truncate">{t.pair}</span>
@@ -349,11 +350,11 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
 
   // --- FULL DASHBOARD: 5+ closed trades ---
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 stagger">
       <DailyRecap trades={trades} />
       {!isLive && (
-        <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2.5">
-          <AlertTriangle className="w-4 h-4 text-amber-400" />
+        <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2.5">
+          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
           <span className="text-sm text-amber-400">Live market data unavailable — using simulated prices. Your edge analysis works on your trade history regardless.</span>
         </div>
       )}
@@ -391,10 +392,10 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
 
       {/* Streak warning */}
       {streakType === 'loss' && currentStreak >= 3 && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 sm:px-5 py-4">
-          <ShieldAlert className="w-5 h-5 text-red-400 flex-shrink-0" />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl px-4 sm:px-5 py-4">
+          <ShieldAlert className="w-5 h-5 text-rose-400 flex-shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-red-400">You're on a {currentStreak}-loss streak</p>
+            <p className="text-sm font-semibold text-rose-400">You're on a {currentStreak}-loss streak</p>
             <p className="text-xs text-slate-400 mt-0.5">Consider stepping back and reviewing your recent trades before entering the next one. Use the Pre-Trade Scorer before your next entry.</p>
           </div>
           <Button size="sm" variant="danger" onClick={() => onNavigate('scorer')} className="flex-shrink-0">
@@ -405,13 +406,13 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
 
       {/* Pre-trade behavioral warnings */}
       {stopWarnings.length > 0 && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 sm:px-5 py-4 space-y-3">
+        <div className="bg-rose-500/10 border border-rose-500/25 rounded-2xl px-4 sm:px-5 py-4 space-y-3">
           <div className="flex items-center gap-2">
-            <AlertOctagon className="w-5 h-5 text-red-400" />
-            <h2 className="text-sm font-semibold text-red-400">Before You Trade Today</h2>
+            <AlertOctagon className="w-5 h-5 text-rose-400" />
+            <h2 className="text-sm font-semibold text-rose-400">Before You Trade Today</h2>
           </div>
           {stopWarnings.map((w, i) => (
-            <div key={i} className="bg-red-500/10 rounded-lg p-3 border border-red-500/20">
+            <div key={i} className="bg-rose-500/[0.06] rounded-xl p-3 border border-rose-500/15">
               <p className="text-sm font-semibold text-slate-200">{w.message}</p>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">{w.detail}</p>
             </div>
@@ -424,7 +425,7 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
 
       {/* Untagged trades prompt */}
       {untaggedCount > 0 && (
-        <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3">
+        <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl px-4 py-3">
           <Tag className="w-5 h-5 text-amber-400 flex-shrink-0" />
           <div className="flex-1">
             <p className="text-sm text-slate-200">
@@ -442,18 +443,18 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {accountability.totalTagged >= 2 && (
           <Card className={`p-4 border ${
-            accountability.level === 'excellent' ? 'border-green-500/30 bg-green-500/5'
-            : accountability.level === 'good' ? 'border-blue-500/20 bg-blue-500/5'
-            : accountability.level === 'building' ? 'border-slate-700 bg-slate-800/30'
-            : 'border-red-500/20 bg-red-500/5'
+            accountability.level === 'excellent' ? 'border-emerald-500/25 bg-emerald-500/[0.04]'
+            : accountability.level === 'good' ? 'border-accent-500/15 bg-accent-500/[0.03]'
+            : accountability.level === 'building' ? 'border-white/[0.06] bg-white/[0.02]'
+            : 'border-rose-500/20 bg-rose-500/[0.04]'
           }`}>
             <div className="flex items-center gap-3">
               {accountability.level === 'excellent' ? (
-                <Award className="w-5 h-5 text-green-400 flex-shrink-0" />
+                <Award className="w-5 h-5 text-emerald-400 flex-shrink-0" />
               ) : accountability.level === 'good' ? (
-                <CheckCircle2 className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-accent-400 flex-shrink-0" />
               ) : accountability.level === 'broken' ? (
-                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                <AlertTriangle className="w-5 h-5 text-rose-400 flex-shrink-0" />
               ) : (
                 <Flame className="w-5 h-5 text-slate-400 flex-shrink-0" />
               )}
@@ -470,12 +471,12 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
 
         <Card className={`p-4 border ${
           validation.isStatisticallySignificant
-            ? validation.winRate > 50 ? 'border-green-500/20 bg-green-500/5'
-            : 'border-red-500/20 bg-red-500/5'
-            : 'border-amber-500/20 bg-amber-500/5'
+            ? validation.winRate > 50 ? 'border-emerald-500/20 bg-emerald-500/[0.04]'
+            : 'border-rose-500/20 bg-rose-500/[0.04]'
+            : 'border-amber-500/20 bg-amber-500/[0.04]'
         }`}>
           <div className="flex items-center gap-3">
-            <Microscope className="w-5 h-5 text-blue-400 flex-shrink-0" />
+            <Microscope className="w-5 h-5 text-accent-400 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-semibold text-slate-200">
@@ -500,10 +501,10 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
 
       {/* Behavioral patterns alert */}
       {patterns.length > 0 && patterns.some((p) => p.severity === 'critical' || p.severity === 'warning') && (
-        <Card className="p-5 border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent">
+        <Card className="p-5 border-rose-500/20 bg-gradient-to-br from-rose-500/[0.05] to-transparent">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <AlertOctagon className="w-5 h-5 text-red-400" />
+              <AlertOctagon className="w-5 h-5 text-rose-400" />
               <h2 className="text-sm font-semibold text-slate-200">Behavioral Patterns Detected</h2>
               <Badge variant="danger">{patterns.length}</Badge>
             </div>
@@ -513,19 +514,19 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
           </div>
           <div className="space-y-2">
             {patterns.filter((p) => p.severity === 'critical' || p.severity === 'warning').slice(0, 3).map((p) => (
-              <div key={p.id} className={`rounded-lg p-3 border ${
+              <div key={p.id} className={`rounded-xl p-3 border ${
                 p.severity === 'critical'
-                  ? 'bg-red-500/5 border-red-500/30'
-                  : 'bg-amber-500/5 border-amber-500/20'
+                  ? 'bg-rose-500/[0.05] border-rose-500/25'
+                  : 'bg-amber-500/[0.04] border-amber-500/15'
               }`}>
                 <div className="flex items-start justify-between mb-1">
                   <div className="flex items-center gap-2">
                     {p.severity === 'critical'
-                      ? <Flame className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                      ? <Flame className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
                       : <AlertTriangle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />}
                     <span className="text-sm font-semibold text-slate-200">{p.title}</span>
                   </div>
-                  <span className={`text-xs font-mono font-bold flex-shrink-0 ${p.estimatedCost < 0 ? 'text-red-400' : 'text-green-400'}`}>
+                  <span className={`text-xs font-mono font-bold flex-shrink-0 ${p.estimatedCost < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
                     {p.estimatedCost > 0 ? '+' : ''}{p.estimatedCost.toFixed(0)}p
                   </span>
                 </div>
@@ -538,11 +539,11 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
 
       {/* Edge insights */}
       {insights.length > 0 && (
-        <Card className="p-5 border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent">
+        <Card className="p-5 border-accent-500/15 bg-gradient-to-br from-accent-500/[0.04] to-transparent">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Fingerprint className="w-5 h-5 text-blue-400" />
-              <h2 className="text-lg font-semibold text-slate-100">Your Edge Insights</h2>
+              <Fingerprint className="w-5 h-5 text-accent-400" />
+              <h2 className="text-lg font-semibold text-slate-100 tracking-tight">Your Edge Insights</h2>
             </div>
             <Button size="sm" variant="ghost" onClick={() => onNavigate('edge')}>
               Full Analysis <ArrowRight className="w-4 h-4 ml-1" />
@@ -552,15 +553,15 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
             {insights.slice(0, 6).map((ins, i) => (
               <div
                 key={i}
-                className={`rounded-lg p-3.5 border ${
-                  ins.isPositive ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'
+                className={`rounded-xl p-3.5 border transition-all duration-200 hover:scale-[1.02] ${
+                  ins.isPositive ? 'bg-emerald-500/[0.04] border-emerald-500/15' : 'bg-rose-500/[0.04] border-rose-500/15'
                 }`}
               >
                 <div className="flex items-start justify-between mb-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wide">{ins.category}</span>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest">{ins.category}</span>
                   {ins.isPositive
-                    ? <TrendingUp className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
-                    : <TrendingDown className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />}
+                    ? <TrendingUp className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    : <TrendingDown className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />}
                 </div>
                 <p className="text-sm font-semibold text-slate-200">{ins.label}</p>
                 <p className="text-xs text-slate-400 mt-0.5">{ins.value}</p>
@@ -576,19 +577,19 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
         {quickScore && (
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-3">
-              <ClipboardCheck className="w-5 h-5 text-blue-400" />
+              <ClipboardCheck className="w-5 h-5 text-accent-400" />
               <h2 className="text-sm font-semibold text-slate-300">Quick Score for EUR/USD Now</h2>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-4xl font-bold font-mono text-blue-400">{quickScore.score}</p>
+                <p className="text-4xl font-bold font-mono text-accent-400 tracking-tight">{quickScore.score}</p>
                 <p className="text-xs text-slate-500 mt-0.5">out of 100</p>
               </div>
               <div className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${
-                quickScore.recommendation === 'strong_take' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
-                quickScore.recommendation === 'take' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                quickScore.recommendation === 'caution' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                'bg-red-500/10 text-red-400 border-red-500/30'
+                quickScore.recommendation === 'strong_take' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' :
+                quickScore.recommendation === 'take' ? 'bg-accent-500/10 text-accent-400 border-accent-500/25' :
+                quickScore.recommendation === 'caution' ? 'bg-amber-500/10 text-amber-400 border-amber-500/25' :
+                'bg-rose-500/10 text-rose-400 border-rose-500/25'
               }`}>
                 {quickScore.recommendation.replace('_', ' ').toUpperCase()}
               </div>
@@ -623,7 +624,7 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
           </div>
           <div className="space-y-2">
             {cf.insights.map((ins, i) => (
-              <div key={i} className="flex items-start gap-2 bg-slate-800/40 rounded-lg p-3">
+              <div key={i} className="flex items-start gap-2 bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
                 <p className="text-xs text-slate-300">{ins}</p>
               </div>
@@ -638,16 +639,16 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
           {sessionData.length > 0 && (
             <Card className="p-5">
               <div className="flex items-center gap-2 mb-3">
-                <Clock className="w-4 h-4 text-blue-400" />
+                <Clock className="w-4 h-4 text-accent-400" />
                 <h2 className="text-sm font-semibold text-slate-300">Best & Worst Sessions</h2>
               </div>
               <div className="space-y-2">
                 {[...sessionData].sort((a, b) => b.totalPips - a.totalPips).slice(0, 4).map((s) => (
-                  <div key={s.label} className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-800/40 gap-2">
+                  <div key={s.label} className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors gap-2">
                     <span className="text-sm text-slate-300 truncate">{s.label}</span>
                     <div className="flex gap-2 sm:gap-3 flex-shrink-0">
                       <span className="text-xs text-slate-500 hidden sm:inline">{s.tradeCount} trades</span>
-                      <span className={`text-sm font-mono font-bold text-right ${s.totalPips >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <span className={`text-sm font-mono font-bold text-right ${s.totalPips >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {s.totalPips > 0 ? '+' : ''}{s.totalPips.toFixed(0)}p
                       </span>
                     </div>
@@ -660,16 +661,16 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
           {setupData.length > 0 && (
             <Card className="p-5">
               <div className="flex items-center gap-2 mb-3">
-                <Zap className="w-4 h-4 text-blue-400" />
+                <Zap className="w-4 h-4 text-accent-400" />
                 <h2 className="text-sm font-semibold text-slate-300">Setup Performance</h2>
               </div>
               <div className="space-y-2">
                 {setupData.slice(0, 4).map((s) => (
-                  <div key={s.label} className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-800/40 gap-2">
+                  <div key={s.label} className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors gap-2">
                     <span className="text-sm text-slate-300 truncate">{s.label}</span>
                     <div className="flex gap-2 sm:gap-3 flex-shrink-0">
                       <span className="text-xs text-slate-500 hidden sm:inline">{s.tradeCount} trades</span>
-                      <span className={`text-sm font-mono font-bold text-right ${s.totalPips >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <span className={`text-sm font-mono font-bold text-right ${s.totalPips >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {s.totalPips > 0 ? '+' : ''}{s.totalPips.toFixed(0)}p
                       </span>
                     </div>
@@ -686,7 +687,7 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-blue-400" />
+              <BarChart3 className="w-4 h-4 text-accent-400" />
               <h2 className="text-sm font-semibold text-slate-300">Recent Trades</h2>
             </div>
             <Button size="sm" variant="ghost" onClick={() => onNavigate('journal')}>
@@ -695,13 +696,13 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
           </div>
           <div className="space-y-1.5">
             {recentTrades.map((t) => (
-              <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-800/30 gap-2">
+              <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors gap-2">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <Badge variant={t.direction === 'BUY' ? 'success' : 'danger'}>{t.direction}</Badge>
                   <span className="text-sm text-slate-200 font-medium truncate">{t.pair}</span>
                   {t.setup_type && <span className="text-xs text-slate-500 hidden sm:inline">{t.setup_type}</span>}
                 </div>
-                <span className={`text-sm font-mono font-bold flex-shrink-0 ${(t.pips_result || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                <span className={`text-sm font-mono font-bold flex-shrink-0 ${(t.pips_result || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {(t.pips_result || 0) > 0 ? '+' : ''}{(t.pips_result || 0).toFixed(1)}p
                 </span>
               </div>
@@ -724,7 +725,7 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
         {strongSignals.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {strongSignals.map((sig) => (
-              <Card key={sig.pair} className="p-4 cursor-pointer hover:border-slate-700" onClick={() => onNavigate('scanner')}>
+              <Card key={sig.pair} className="p-4 cursor-pointer glass-hover" onClick={() => onNavigate('scanner')}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-bold text-slate-200">{sig.pair}</span>
                   <Badge variant={sig.direction === 'BUY' ? 'success' : 'danger'}>
@@ -747,4 +748,3 @@ export function Dashboard({ pairs, trades, isLive, onNavigate, onExecuteTrade }:
     </div>
   );
 }
-
