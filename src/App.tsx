@@ -17,6 +17,7 @@ import { PreTradeScorer } from '@/views/PreTradeScorer';
 import { RiskCalculator } from '@/views/RiskCalculator';
 import { SettingsView } from '@/views/Settings';
 import { AuthPage } from '@/views/AuthPage';
+import { Landing } from '@/views/Landing';
 import { Import } from '@/views/Import';
 import { TradeCalendar } from '@/views/TradeCalendar';
 import {
@@ -56,6 +57,8 @@ function App() {
   const [strategy, setStrategy] = useState<StrategyConfig>(DEFAULT_STRATEGY);
   const [pendingSignal, setPendingSignal] = useState<TradingSignal | null>(null);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
 
   const { pairs, loading, refreshing, lastUpdate, refresh, isLive } = useForexData(30000);
   const { trades, addTrade, closeTrade, deleteTrade, refetch } = useTrades();
@@ -95,6 +98,17 @@ function App() {
   }
 
   if (!session) {
+    if (showAuth) {
+      return <AuthPage />;
+    }
+    if (showLanding) {
+      return (
+        <Landing
+          onGetStarted={() => setShowAuth(true)}
+          onSignIn={() => setShowAuth(true)}
+        />
+      );
+    }
     return <AuthPage />;
   }
 
