@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Global mobile fixes === */
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent iOS auto-zoom on input focus — inputs must be >= 16px */
+input, select, textarea {
+  font-size: 16px;
+}
+
+@media (min-width: 1024px) {
+  input, select, textarea {
+    font-size: 14px;
+  }
+}
+
+/* Safe area insets for notch devices */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Better touch targets on mobile */
+@media (max-width: 1023px) {
+  button, [role="button"] {
+    min-height: 40px;
+  }
+}
+
+/* Hide scrollbar utility for horizontal scroll areas */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Prevent horizontal overflow in grid/table containers */
+table { max-width: 100%; }
