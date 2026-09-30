@@ -3,7 +3,7 @@ import type { Trade, TradingSignal, MentalState, ExitReason, TradeConfig, PairDa
 import { isTradeTagged } from '@/lib/types';
 import { Card, Badge, Button, Input, Select, Modal, PairSelect } from '@/components/ui';
 import { useTrades } from '@/hooks/useTrades';
-import { getPipSize } from '@/lib/forex';
+import { getPipSize, getPipValuePerLot } from '@/lib/forex';
 import { supabase } from '@/lib/supabase';
 import { TradeReplay } from '@/components/TradeReplay';
 import {
@@ -176,7 +176,8 @@ export function Journal({ trades, addTrade, closeTrade, deleteTrade, pendingSign
     const pips = trade.direction === 'BUY'
       ? (exit - trade.entry_price) / pipSize
       : (trade.entry_price - exit) / pipSize;
-    const pnl = pips * (trade.lot_size / 0.01) * 1;
+    const pipValuePerLot = getPipValuePerLot(trade.pair);
+    const pnl = pips * trade.lot_size * pipValuePerLot;
 
     await closeTrade(showClose, exit, pips, pnl);
 
@@ -613,6 +614,24 @@ export function Journal({ trades, addTrade, closeTrade, deleteTrade, pendingSign
                 <div className="flex justify-between"><span className="text-slate-400">Pair</span><span className="text-slate-200 font-semibold">{trade.pair}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Direction</span><span className="text-slate-200">{trade.direction}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Entry</span><span className="text-slate-200 font-mono">{formatPrice(trade.entry_price)}</span></div>
+                {closePrice && (() => {
+                  const exitNum = parseFloat(closePrice);
+                  if (!exitNum || isNaN(exitNum)) return null;
+                  const ps = getPipSize(trade.pair);
+                  const pp = trade.direction === 'BUY'
+                    ? (exitNum - trade.entry_price) / ps
+                    : (trade.entry_price - exitNum) / ps;
+                  const pv = getPipValuePerLot(trade.pair);
+                  const pl = pp * trade.lot_size * pv;
+                  return (
+                    <div className="flex justify-between pt-1 border-t border-slate-700/50">
+                      <span className="text-slate-400">Est. P/L</span>
+                      <span className={`font-mono font-bold ${pl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {pl > 0 ? '+' : ''}${pl.toFixed(2)} ({pp > 0 ? '+' : ''}{pp.toFixed(1)}p)
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
             );
           })()}
@@ -632,10 +651,10 @@ export function Journal({ trades, addTrade, closeTrade, deleteTrade, pendingSign
               <Select label="Exit Reason" value={closeForm.exit_reason} onChange={(v) => setCloseForm({ ...closeForm, exit_reason: v as ExitReason })}
                 options={EXIT_OPTIONS} />
               <div className="grid grid-cols-2 gap-4">
-                <Input label="Max Favorable (pips)" type="number" step="0.1" value={closeForm.max_favorable}
-                  onChange={(v) => setCloseForm({ ...closeForm, max_favorable: v })} placeholder="Best pip movement" />
-                <Input label="Max Adverse (pips)" type="number" step="0.1" value={closeForm.max_adverse}
-                  onChange={(v) => setCloseForm({ ...closeForm, max_adverse: v })} placeholder="Worst drawdown" />
+                <Input label="Best pip run (optional)" type="number" step="0.1" value={closeForm.max_favorable}
+                  onChange={(v) => setCloseForm({ ...closeForm, max_favorable: v })} placeholder="e.g. 25" />
+                <Input label="Worst dip (optional)" type="number" step="0.1" value={closeForm.max_adverse}
+                  onChange={(v) => setCloseForm({ ...closeForm, max_adverse: v })} placeholder="e.g. -10" />
               </div>
             </div>
           )}
