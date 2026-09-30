@@ -14,7 +14,7 @@ import { calculateAccountabilityStreak, getLastViolation } from '@/lib/accountab
 import {
   Plus, XCircle, Trash2, BookOpen, Brain, Clock, Smile, Zap,
   ClipboardCheck, ChevronDown, ChevronUp, TrendingUp, TrendingDown,
-  CheckCircle2, Flame, Tag, AlertCircle, Award, Eye,
+  CheckCircle2, Flame, Tag, AlertCircle, Award, Eye, Download,
 } from 'lucide-react';
 
 interface JournalProps {
@@ -230,6 +230,37 @@ export function Journal({ trades, addTrade, closeTrade, deleteTrade, pendingSign
   const closedTrades = trades.filter((t) => t.status === 'closed');
   const totalPips = closedTrades.reduce((s, t) => s + (t.pips_result || 0), 0);
 
+  const exportCSV = () => {
+    const headers = [
+      'Pair', 'Direction', 'Status', 'Entry Price', 'Exit Price', 'Stop Loss',
+      'Take Profit', 'Lot Size', 'Pips Result', 'P/L', 'Session', 'Setup Type',
+      'Confidence', 'Mental State', 'Confluences', 'Opened At', 'Closed At',
+      'Exit Reason', 'Notes',
+    ];
+    const escape = (v: unknown) => {
+      const s = v === null || v === undefined ? '' : String(v);
+      return s.includes(',') || s.includes('"') || s.includes('\n')
+        ? `"${s.replace(/"/g, '""')}"`
+        : s;
+    };
+    const rows = trades.map((t) => [
+      t.pair, t.direction, t.status, t.entry_price, t.exit_price ?? '',
+      t.stop_loss ?? '', t.take_profit ?? '', t.lot_size,
+      t.pips_result ?? '', t.profit_loss ?? '',
+      t.session ?? '', t.setup_type ?? '', t.confidence_level ?? '',
+      t.mental_state ?? '', (t.confluences || []).join('; '),
+      t.opened_at, t.closed_at ?? '', t.exit_reason ?? '', t.notes ?? '',
+    ].map(escape).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `trades-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -239,9 +270,14 @@ export function Journal({ trades, addTrade, closeTrade, deleteTrade, pendingSign
             {openTrades.length} open / {closedTrades.length} closed / {totalPips > 0 ? '+' : ''}{totalPips.toFixed(0)} pips
           </p>
         </div>
-        <Button onClick={() => setShowAdd(true)} size="md">
-          <Plus className="w-5 h-5 mr-1" /> Log Trade
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="md" onClick={exportCSV} disabled={trades.length === 0}>
+            <Download className="w-4 h-4 mr-1" /> Export
+          </Button>
+          <Button onClick={() => setShowAdd(true)} size="md">
+            <Plus className="w-5 h-5 mr-1" /> Log Trade
+          </Button>
+        </div>
       </div>
 
       {pendingSignal && (
